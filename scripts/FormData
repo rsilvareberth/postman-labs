@@ -1,0 +1,30 @@
+    pm.sendRequest({
+        url: pm.environment.get("API_URL") + "/oauth/token",
+        method: 'POST',
+        header: {
+            'Content-Type': 'multipart/form-data; boundary=something',
+            'Authorization': 'Basic ' + pm.environment.get("OAUTH_CREDENTIALS")
+        },
+        body: {
+           mode: 'formdata',
+           formdata: [
+               {
+                   key: 'grant_type',
+                   value: 'client_credentials',
+                   disabled: false
+               }
+           ]
+
+        }
+    }, function (err, res) {
+        console.log(err ? err : res.json());
+        if (err === null) {
+            console.log('Saving the token and expiry date')
+            var responseJson = res.json();
+            pm.environment.set('CurrentAccessToken', res.json().access_token)
+
+            var expiryDate = new Date();
+            expiryDate.setSeconds(expiryDate.getSeconds() + res.json().expires_in);
+            pm.environment.set('AccessTokenExpiry', expiryDate.getTime());
+        }
+    });
